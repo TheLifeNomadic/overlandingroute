@@ -1,6 +1,6 @@
 <?php
 /**
-	* @package Geotagged Posts
+	* @package Overlanding Route Map
 	* @version 0.1
 	*/
 /*
@@ -14,13 +14,13 @@ Author URI: https://www.thelifenomadic.com
 
 if ( ! defined( TLN_ROUTEMAP_GAPI_KEY ) ) {
 	//get a google maps API key here https://developers.google.com/maps/documentation/javascript/get-api-key
-	define( 'TLN_ROUTEMAP_GAPI_KEY', 'YOUR-API-KEY' );
+	define( 'TLN_ROUTEMAP_GAPI_KEY', 'AIzaSyCfHNz0lwtMIBl870tuOJmQWKZyXhy1GHI' );
 }
 function tln_coordinates() {
 	return json_encode(array(
 		//use the following format for latitude/longitude
-			//array( 'lat' => 1.11638, 'lng' => -77.16864 ),
-			//array( 'lat' => 0.81408, 'lng' => -77.66522 ),
+			array( 'lat' => 1.11638, 'lng' => -77.16864 ),
+			array( 'lat' => 0.81408, 'lng' => -77.66522 ),
 		)
 	);
 }
@@ -45,6 +45,7 @@ function tln_routemap() {
 	wp_enqueue_script( 'google-maps' );
 	$id = substr( sha1( "Google Map" . time() ), rand( 2, 10 ), rand( 5, 8 ) );
 
+		$markers = tln_coordinates();
 		ob_start();
 		?>
 		<div class="map" style="min-height: 300px; z-index:10;" id="map-<?php echo $id ?>"></div>
