@@ -1,6 +1,6 @@
 <?php
 /**
-	* @package Geotagged Posts
+	* @package Overlanding Route Map
 	* @version 0.1
 	*/
 /*
