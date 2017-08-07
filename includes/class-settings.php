@@ -6,7 +6,7 @@ class TLN_Route_Settings {
 
 	public function __construct() {
 		include_once( 'views/admin-settings.php' );
-		wp_print_scripts( 'tln-routemap-admin' );
+		wp_print_scripts( array( 'tln-routemap-admin', 'bitcoin-donation-button' ) );
 	}
 }
 

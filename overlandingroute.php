@@ -71,6 +71,8 @@ add_action( 'admin_enqueue_scripts', 'tln_register_scripts' );
 
 function tln_register_scripts() {
 	$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
+	wp_register_script( 'blockr.io-coinwidget', '//blockr.io/js_external/coinwidget/coin.js' );
+	wp_register_script( 'bitcoin-donation-button', plugins_url( '/assets/js/bc-donate-button' . $suffix . '.js', __FILE__ ), array( 'blockr.io-coinwidget' ), TLN_ROUTEMAP_VERSION, true );
 	wp_register_script( 'tln-routemap-admin', plugins_url( '/assets/js/admin-settings' . $suffix . '.js', __FILE__ ), array( 'jquery' ), TLN_ROUTEMAP_VERSION, true );
 	wp_localize_script( 'tln-routemap-admin', 'tln_routemap_settings_params', array( 'invalid_key_message' => __( 'Invalid Key', 'tln-overlandingroute' ) ) );
 }
@@ -82,6 +84,21 @@ function tln_delete_key() {
 	wp_send_json( array( 'success' => true ) );
 }
 
+add_action( 'wp_ajax_tln-update-waypoints', 'tln_update_waypoints' );
+
+function tln_update_waypoints() {
+	$waypoints = array();
+	check_ajax_referer( 'tln_update_waypoints', '_tln_waypoint_nonce' );
+	foreach( $_POST['lat'] as $key => $lat ) {
+		if ( tln_validateLatLong( $_POST['lat'][ $key ], $_POST['lng'][ $key ] ) ) {
+			$waypoints[] = array( 'lat' => $_POST['lat'][ $key ], 'lng' => $_POST['lng'][ $key ] );
+		} else {
+			wp_send_json( array( 'success' => false, 'message' => __( 'Invalid Latitude/Longitude detected, please try again', 'tln-overlandingroute' ) ) );
+		}
+	}
+	$success = update_option( 'tln_waypoints', array_values( array_unique( $waypoints, SORT_REGULAR ) ) );
+	wp_send_json( array( 'success' => $success, 'message' => $_POST ) );
+}
 
 /**
  * Validates a given coordinate
