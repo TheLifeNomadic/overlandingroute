@@ -11,33 +11,12 @@ Author: Will Brubaker
 Version: 0.1
 Author URI: https://www.thelifenomadic.com
 */
-
-if ( ! defined( TLN_ROUTEMAP_GAPI_KEY ) ) {
-	//get a google maps API key here https://developers.google.com/maps/documentation/javascript/get-api-key
-	define( 'TLN_ROUTEMAP_GAPI_KEY', 'AIzaSyCfHNz0lwtMIBl870tuOJmQWKZyXhy1GHI' );
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly.
 }
-function tln_coordinates() {
-	return json_encode(array(
-		//use the following format for latitude/longitude
-			array( 'lat' => 1.11638, 'lng' => -77.16864 ),
-			array( 'lat' => 0.81408, 'lng' => -77.66522 ),
-		)
-	);
+if ( ! defined( 'TLN_ROUTEMAP_VERSION' ) ) {
+	define( 'TLN_ROUTEMAP_VERSION', '0.1' );
 }
-
-add_action( 'wp_enqueue_scripts', 'tln_enqueue_scripts' );
-
-function tln_enqueue_scripts() {
-	wp_register_script(
-				'google-maps',
-				'//maps.googleapis.com/maps/api/js?key=' . TLN_ROUTEMAP_GAPI_KEY . '&callback=initMap',
-				array(),
-				'1.0',
-				true
-		);
-		wp_localize_script( 'google-maps', 'tln_coordinates', tln_coordinates() );
-}
-
 
 add_shortcode( 'routemap', 'tln_routemap' );
 
@@ -74,4 +53,43 @@ function tln_routemap() {
 		<?php
 		$output = ob_get_clean();
 		return $output;
+}
+
+add_action( 'admin_menu', 'tln_settings_menu' );
+
+function tln_settings_menu() {
+	$submenu = add_submenu_page( 'options-general.php', 'My Overlanding Route Settings', 'Route Map', 'manage_options', 'overlanding-routemap', 'tln_routemap_settings' );
+}
+
+function tln_routemap_settings() {
+	if ( ! class_exists( 'TLN_Route_Settings' ) ) {
+		include_once( 'includes/class-settings.php' );
+	}
+}
+
+add_action( 'admin_enqueue_scripts', 'tln_register_scripts' );
+
+function tln_register_scripts() {
+	$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
+	wp_register_script( 'tln-routemap-admin', plugins_url( '/assets/js/admin-settings' . $suffix . '.js', __FILE__ ), array( 'jquery' ), TLN_ROUTEMAP_VERSION, true );
+	wp_localize_script( 'tln-routemap-admin', 'tln_routemap_settings_params', array( 'invalid_key_message' => __( 'Invalid Key', 'tln-overlandingroute' ) ) );
+}
+
+add_action( 'wp_ajax_tln_delete_gmap_api_key', 'tln_delete_key' );
+
+function tln_delete_key() {
+	delete_option( 'tln_gmaps-api-key' );
+	wp_send_json( array( 'success' => true ) );
+}
+
+
+/**
+ * Validates a given coordinate
+ *
+ * @param float|int|string $lat Latitude
+ * @param float|int|string $long Longitude
+ * @return bool `true` if the coordinate is valid, `false` if not
+ */
+function tln_validateLatLong( $lat, $long ) {
+  return preg_match('/^[-]?(([0-8]?[0-9])\.(\d+))|(90(\.0+)?),[-]?((((1[0-7][0-9])|([0-9]?[0-9]))\.(\d+))|180(\.0+)?)$/', $lat.','.$long);
 }
