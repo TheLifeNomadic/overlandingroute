@@ -90,7 +90,6 @@ function gm_authFailure() {
 
 		<div class="waypoint-row" style="width: 100%; float: left;">
 			<p style="width: 100%; float: left;">
-				<span style="float: left;"><?php echo $count + 1; ?>:</span>
 				<input type="text" name="lat[<?php echo $count; ?>]" style="width:45%; max-width: 250px; float:left; margin-right: 5%;" />
 				<input type="text" name="lng[<?php echo $count; ?>]" style="width:45%; max-width: 250px; float:left;" />
 			</p>
@@ -102,7 +101,6 @@ function gm_authFailure() {
 			?>
 			<div class="waypoint-row" style="width: 100%; float: left;">
 				<p style="width: 100%; float: left;">
-					<span style="float: left;"><?php echo $key +1; ?>:</span>
 					<input type="text" name="lat[<?php echo $key; ?>]" value="<?php echo $waypoint['lat']; ?>" style="width:45%; max-width: 250px; float:left; margin-right: 5%;" />
 					<input type="text" name="lng[<?php echo $key; ?>]" value="<?php echo $waypoint['lng']; ?>" style="width:45%; max-width: 250px; float:left;" />
 				</p>
