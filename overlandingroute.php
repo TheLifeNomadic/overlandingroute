@@ -21,38 +21,44 @@ if ( ! defined( 'TLN_ROUTEMAP_VERSION' ) ) {
 add_shortcode( 'routemap', 'tln_routemap' );
 
 function tln_routemap() {
-	wp_enqueue_script( 'google-maps' );
-	$id = substr( sha1( "Google Map" . time() ), rand( 2, 10 ), rand( 5, 8 ) );
+	$output = __( 'The Google Maps API key is not configured', 'tln-overlandingroute' );
 
-		$markers = tln_coordinates();
-		ob_start();
-		?>
-		<div class="map" style="min-height: 300px; z-index:10;" id="map-<?php echo $id ?>"></div>
+	$api_key = get_option( 'tln_gmaps-api-key', false );
+	if ( $api_key ) {
+		wp_enqueue_script( 'google-maps' );
+		$id = substr( sha1( "Google Map" . time() ), rand( 2, 10 ), rand( 5, 8 ) );
 
-		<script type='text/javascript'>
+			$markers = json_encode( get_option( 'tln_waypoints', array() ) );
+			ob_start();
+			?>
+			<div class="map" style="min-height: 300px; z-index:10;" id="map-<?php echo $id ?>"></div>
 
-		function initMap() {
-			var height = jQuery(window).height()
-			jQuery('.map').height(height)
-			var map = new google.maps.Map(document.getElementById('map-<?php echo $id ?>'), {
-				zoom: 5,
-				center: {lat: 0.81408, lng: -77.66522},
-				title: 'My Overlanding Route'
-			})
+			<script type='text/javascript'>
 
-			var route = new google.maps.Polyline({
-				path: JSON.parse(tln_coordinates),
-				geodesic: true,
-				strokeColor: '#FF0000',
-				strokeOpacity: 1.0,
-				strokeWeight: 2
-			});
-			route.setMap(map);
-		}
-		</script>
-		<?php
-		$output = ob_get_clean();
-		return $output;
+			function initMap() {
+				var height = jQuery(window).height()
+				jQuery('.map').height(height)
+				var map = new google.maps.Map(document.getElementById('map-<?php echo $id ?>'), {
+					zoom: 5,
+					center: {lat: 0.81408, lng: -77.66522},
+					title: 'My Overlanding Route'
+				})
+
+				var route = new google.maps.Polyline({
+					path: JSON.parse(tln_coordinates),
+					geodesic: true,
+					strokeColor: '#FF0000',
+					strokeOpacity: 1.0,
+					strokeWeight: 2
+				});
+				route.setMap(map);
+			}
+			</script>
+			<?php
+			$output = ob_get_clean();
+
+	}
+	return $output;
 }
 
 add_action( 'admin_menu', 'tln_settings_menu' );
@@ -71,6 +77,14 @@ add_action( 'admin_enqueue_scripts', 'tln_register_scripts' );
 
 function tln_register_scripts() {
 	$suffix = ( defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ) ? '' : '.min';
+	$api_key = get_option( 'tln_gmaps-api-key', false );
+	wp_register_script(
+		  'google-maps',
+		  '//maps.googleapis.com/maps/api/js?key='. $api_key . '&callback=initMap',
+		  array(),
+		  '1.0',
+		  true
+		);
 	wp_register_script( 'blockr.io-coinwidget', '//blockr.io/js_external/coinwidget/coin.js' );
 	wp_register_script( 'bitcoin-donation-button', plugins_url( '/assets/js/bc-donate-button' . $suffix . '.js', __FILE__ ), array( 'blockr.io-coinwidget' ), TLN_ROUTEMAP_VERSION, true );
 	wp_register_script( 'tln-routemap-admin', plugins_url( '/assets/js/admin-settings' . $suffix . '.js', __FILE__ ), array( 'jquery' ), TLN_ROUTEMAP_VERSION, true );
