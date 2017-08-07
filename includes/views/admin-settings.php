@@ -96,7 +96,8 @@ function gm_authFailure() {
 			</p>
 		</div><!--.waypoint-row-->
 		<?php
-		$waypoints = array_reverse( $waypoints, true );
+		//$waypoints = array_reverse( $waypoints, true );
+		//$
 		foreach( $waypoints as $key => $waypoint ) {
 			?>
 			<div class="waypoint-row" style="width: 100%; float: left;">
